@@ -1,31 +1,56 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase"; // adjust the path if needed
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .eq("password", password);
+
+    if (error) {
+      setError(error.message);
+    } else if (data && data.length === 1) {
+      router.push("/user-dashboard");
+    } else {
+      setError("Invalid credentials");
+    }
+  };
+
   return (
     <div className="w-full max-w-md rounded-2xl bg-white p-8">
       {/* Title */}
       <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold text-black">
-          Welcome back
-        </h2>
-        <p className="text-sm text-gray-500">
-          Login to your account
-        </p>
+        <h2 className="text-2xl font-bold text-black">Welcome back</h2>
+        <p className="text-sm text-gray-500">Login to your account</p>
       </div>
 
       {/* Form */}
-      <form className="mt-6 space-y-5">
+      <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
             placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -35,12 +60,13 @@ export function LoginForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
-          {/* Forgot password UNDER input */}
           <div className="text-right">
             <Link
-              href="/forgot-password"
+              href="/forget-password"
               className="text-sm text-gray-600 hover:underline"
             >
               Forgot password?
@@ -48,7 +74,9 @@ export function LoginForm() {
           </div>
         </div>
 
-        <Button className="w-full rounded-xl bg-black text-white hover:bg-gray-900">
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <Button type="submit" className="w-full rounded-xl bg-black text-white hover:bg-gray-900">
           Login
         </Button>
 
@@ -60,5 +88,5 @@ export function LoginForm() {
         </p>
       </form>
     </div>
-  )
+  );
 }

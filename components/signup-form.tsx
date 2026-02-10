@@ -1,72 +1,60 @@
-"use client"
+// signup-form.tsx
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export function SignupForm() {
+export default function SignupForm() {
+  const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    // optional: hash the password here for security
+    const { error: insertError } = await supabase
+      .from("users")
+      .insert([{ full_name: fullName, email, password }]);
+
+    if (insertError) {
+      setError(insertError.message);
+    } else {
+      router.push("/login");
+    }
+  };
+
   return (
-    <div className="w-full max-w-md rounded-2xl bg-white p-8">
-      {/* Title */}
-      <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold text-black">
-          Create an account
-        </h2>
-        <p className="text-sm text-gray-500">
-          Get started with your free account today
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="fullName">Full Name</Label>
+        <Input id="fullName" value={fullName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)} />
       </div>
-
-      {/* Form */}
-      <form className="mt-6 space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
-          <Input
-            id="fullName"
-            type="text"
-            placeholder="Enter your full name"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="Enter your password"
-          />
-        </div>
-
-        <Button className="w-full rounded-xl bg-[#2f59a7] text-white hover:bg-[#274b8a]">
-          Sign up
-        </Button>
-
-        <p className="text-center text-sm text-gray-600">
-          Don&apos;t you have an account?{" "}
-          <Link href="/login" className="font-medium hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </form>
-    </div>
-  )
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} />
+      </div>
+      <div>
+        <Label htmlFor="password">Password</Label>
+        <Input id="password" type="password" value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} />
+      </div>
+      <div>
+        <Label htmlFor="confirm">Confirm Password</Label>
+        <Input id="confirm" type="password" value={confirm} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirm(e.target.value)} />
+      </div>
+      {error && <p className="text-red-500">{error}</p>}
+      <Button type="submit" className="w-full">Sign up</Button>
+    </form>
+  );
 }
