@@ -1,88 +1,114 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase"; // adjust the path if needed
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
-export function LoginForm() {
+export default function LoginForm() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
+    if (loading) return;
 
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .eq("password", password);
+    setLoading(true);
+    setErrorMessage("");
+
+    const cleanEmail = email.trim();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password,
+    });
+
+    console.log("LOGIN DATA:", data);
+    console.log("LOGIN ERROR:", error);
 
     if (error) {
-      setError(error.message);
-    } else if (data && data.length === 1) {
-      router.push("/user-dashboard");
-    } else {
-      setError("Invalid credentials");
+      setErrorMessage(error.message);
+      setLoading(false);
+      return;
     }
-  };
+
+    // ✅ success
+    router.push("/user-dashboard");
+    router.refresh();
+  }
 
   return (
-    <div className="w-full max-w-md rounded-2xl bg-white p-8">
-      {/* Title */}
-      <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold text-black">Welcome back</h2>
-        <p className="text-sm text-gray-500">Login to your account</p>
-      </div>
+    <div className="mx-auto w-full max-w-[520px] bg-white rounded-3xl shadow-xl px-12 py-12">
+      <h2 className="text-3xl font-extrabold text-center text-gray-900">
+        Welcome back
+      </h2>
 
-      {/* Form */}
-      <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
+      <p className="text-center text-base text-gray-500 mt-3">
+        Login to your account
+      </p>
+
+      <form onSubmit={handleLogin} className="mt-8 space-y-6">
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
+            Email
+          </label>
+          <input
             type="email"
             placeholder="Enter your email"
+            className="w-full rounded-xl border border-gray-200 px-5 py-3 text-base outline-none focus:border-gray-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
+            Password
+          </label>
+          <input
             type="password"
             placeholder="Enter your password"
+            className="w-full rounded-xl border border-gray-200 px-5 py-3 text-base outline-none focus:border-gray-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            required
           />
 
-          <div className="text-right">
+          <div className="mt-3 text-right">
             <Link
-              href="/forget-password"
-              className="text-sm text-gray-600 hover:underline"
+              href="/forgot-password"
+              className="text-sm text-gray-500 hover:text-gray-700"
             >
               Forgot password?
             </Link>
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {errorMessage && (
+          <p className="text-sm text-red-500">{errorMessage}</p>
+        )}
 
-        <Button type="submit" className="w-full rounded-xl bg-black text-white hover:bg-gray-900">
-          Login
-        </Button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-2xl bg-black py-4 text-white text-lg font-semibold hover:opacity-90 transition disabled:opacity-60"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-base text-gray-500 pt-4">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium hover:underline">
+          <Link
+            href="/signup"
+            className="font-semibold text-gray-800 hover:underline"
+          >
             Sign up
           </Link>
         </p>

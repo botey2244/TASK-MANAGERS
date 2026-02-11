@@ -10,7 +10,7 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#cfe0f2]">
+    <div className="h-screen bg-[#cfe0f2] overflow-hidden">
       {/* Top bar */}
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-6 py-6">
         {/* Logo */}
@@ -30,10 +30,11 @@ export default function AuthLayout({
       </div>
 
       {/* Main content */}
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-6 pb-10 md:grid-cols-2 md:items-center">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 pb-10 md:grid-cols-2 md:items-center">
+        
         {/* Left side */}
-        <div className="space-y-4">
-          <h1 className="text-5xl font-extrabold tracking-tight text-black">
+        <div className="space-y-5">
+          <h1 className="text-5xl font-extrabold tracking-tight text-black leading-tight">
             {title}
           </h1>
 
@@ -41,27 +42,31 @@ export default function AuthLayout({
             {subtitle}
           </p>
 
-          {/* Illustration */}
-          <div className="relative mt-8 h-[360px] w-full">
+          {/* Bigger Illustration */}
+          <div className="relative mt-6 h-[430px] w-full">
             <Image
               src="/auth-illustration.png"
               alt="Auth illustration"
               fill
-              className="object-contain"
+              className="object-contain scale-110"
               priority
             />
           </div>
         </div>
 
         {/* Right side (form) */}
-        <div className="w-full">
-          {children}
+        <div className="flex w-full justify-center md:justify-end">
+          <div className="w-full max-w-[380px]">
+            {children}
+          </div>
         </div>
+
       </div>
 
       {/* Footer */}
       <div className="mx-auto w-full max-w-6xl px-6 pb-6">
         <div className="flex items-center justify-center gap-2 text-sm text-[#2a3b52] opacity-80">
+          
           {/* Small logo */}
           <div className="relative h-7 w-7">
             <Image

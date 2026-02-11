@@ -3,19 +3,37 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function ForgetPasswordPage() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSendCode = (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: connect backend later (send reset code to email)
-    // For now we just test UI
-    alert(`Reset code will be sent to: ${email}`);
+    setLoading(true);
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    // Supabase sends a reset link to email
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+
+    setSuccessMsg("✅ Reset link sent! Please check your email.");
   };
 
   return (
-    <div className="min-h-screen bg-[#cfe0f2]">
+    <div className="h-screen bg-[#cfe0f2] overflow-hidden">
       {/* Top: back to website */}
       <div className="px-8 pt-6">
         <Link
@@ -47,7 +65,7 @@ export default function ForgetPasswordPage() {
             a code to reset it.
           </p>
 
-          <div className="relative mt-10 h-[320px] w-full">
+          <div className="relative mt-6 h-[360px] w-full">
             <Image
               src="/auth-illustration.png"
               alt="Forget password illustration"
@@ -74,12 +92,17 @@ export default function ForgetPasswordPage() {
               />
             </div>
 
+            {/* messages */}
+            {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+            {successMsg && <p className="text-sm text-green-700">{successMsg}</p>}
+
             <div className="flex justify-center pt-2">
               <button
                 type="submit"
-                className="rounded-full bg-[#244a9b] px-10 py-3 text-sm font-semibold text-white hover:opacity-95"
+                disabled={loading}
+                className="rounded-full bg-[#244a9b] px-10 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-60"
               >
-                Send a reset code
+                {loading ? "Sending..." : "Send a reset code"}
               </button>
             </div>
 
@@ -101,7 +124,7 @@ export default function ForgetPasswordPage() {
           <Image src="/logo.png" alt="note icon" fill className="object-contain" />
         </div>
         <p>
-          This page is protected to ensure you're not a bot.{" "}
+          This page is protected to ensure you&apos;re not a bot.{" "}
           <span className="text-red-500">Learn more</span>
         </p>
       </div>

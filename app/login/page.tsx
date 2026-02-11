@@ -1,5 +1,5 @@
-import AuthLayout from "@/components/AuthLayout"
-import { LoginForm } from "@/components/login-form"
+import AuthLayout from "@/components/AuthLayout";
+import LoginForm from "@/components/login-form";
 
 export default function LoginPage() {
   return (
@@ -9,5 +9,5 @@ export default function LoginPage() {
     >
       <LoginForm />
     </AuthLayout>
-  )
+  );
 }
