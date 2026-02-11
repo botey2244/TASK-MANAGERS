@@ -43,7 +43,7 @@ export default function AuthLayout({
           </p>
 
           {/* Bigger Illustration */}
-          <div className="relative mt-6 h-[430px] w-full">
+          <div className="relative mt-6 h-[400px] w-full">
             <Image
               src="/auth-illustration.png"
               alt="Auth illustration"

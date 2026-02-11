@@ -13,16 +13,30 @@ export default function SignupForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+
+    // ✅ prevent double submit
+    if (loading) return;
+
     setErrorMessage("");
+    setSuccessMessage("");
+
+    const cleanEmail = email.trim();
+
+    if (!fullName.trim()) {
+      setErrorMessage("Please enter your full name.");
+      return;
+    }
 
     if (password !== confirm) {
       setErrorMessage("Passwords do not match.");
       return;
     }
+
     if (password.length < 6) {
       setErrorMessage("Password must be at least 6 characters.");
       return;
@@ -30,22 +44,39 @@ export default function SignupForm() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email,
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName.trim() },
       },
     });
+
+    console.log("SIGNUP DATA:", data);
+    console.log("SIGNUP ERROR:", error);
 
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      const msg = error.message.toLowerCase();
+
+      // ✅ friendly rate limit message
+      if (msg.includes("rate limit")) {
+        setErrorMessage(
+          "Too many attempts. Please wait 5–10 minutes, then try again."
+        );
+      } else if (msg.includes("already registered")) {
+        setErrorMessage("This email is already registered. Please login.");
+      } else {
+        setErrorMessage(error.message);
+      }
+
       return;
     }
 
-    router.push("/login");
+    // ✅ success
+    setSuccessMessage("Account created! Redirecting to login...");
+    setTimeout(() => router.push("/login"), 800);
   }
 
   return (
@@ -115,6 +146,9 @@ export default function SignupForm() {
         </div>
 
         {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+        {successMessage && (
+          <p className="text-sm text-green-600">{successMessage}</p>
+        )}
 
         <button
           type="submit"
@@ -126,7 +160,10 @@ export default function SignupForm() {
 
         <p className="text-center text-sm text-gray-500 pt-2">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-gray-800 hover:underline">
+          <Link
+            href="/login"
+            className="font-semibold text-gray-800 hover:underline"
+          >
             Sign in
           </Link>
         </p>
