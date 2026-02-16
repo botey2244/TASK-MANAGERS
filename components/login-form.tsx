@@ -20,7 +20,7 @@ export default function LoginForm() {
     setLoading(true);
     setErrorMessage("");
 
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: cleanEmail,
@@ -36,9 +36,17 @@ export default function LoginForm() {
       return;
     }
 
-    // ✅ success
-    router.push("/user-dashboard");
+    // ✅ redirect by email domain
+    const userEmail = data.user?.email ?? cleanEmail;
+
+    if (userEmail.toLowerCase().endsWith("@admin.com")) {
+      router.push("/admin-dashboard");
+    } else {
+      router.push("/user-dashboard");
+    }
+
     router.refresh();
+    setLoading(false);
   }
 
   return (

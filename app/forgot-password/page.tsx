@@ -2,24 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function ForgetPasswordPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSendCode = async (e: React.FormEvent) => {
+  const handleSendLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
     setErrorMsg("");
 
-    // Supabase sends a reset link to email
+    // IMPORTANT: redirect user to /new-password when they click email link
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/new-password`,
     });
 
     setLoading(false);
@@ -30,6 +33,8 @@ export default function ForgetPasswordPage() {
     }
 
     setSuccessMsg("✅ Reset link sent! Please check your email.");
+    // Go to "Check your email" page (your figma Reset Password page)
+    router.push(`/reset-password?email=${encodeURIComponent(email)}`);
   };
 
   return (
@@ -62,7 +67,7 @@ export default function ForgetPasswordPage() {
           <h1 className="text-5xl font-extrabold text-black">Forget Password!</h1>
           <p className="mt-4 max-w-md text-base text-[#243042]">
             Enter your email and we’ll send you <br className="hidden md:block" />
-            a code to reset it.
+            a reset link to change your password.
           </p>
 
           <div className="relative mt-6 h-[360px] w-full">
@@ -78,7 +83,7 @@ export default function ForgetPasswordPage() {
 
         {/* Right card */}
         <div className="rounded-3xl bg-[#f7eeee] p-10 shadow-sm">
-          <form onSubmit={handleSendCode} className="space-y-6">
+          <form onSubmit={handleSendLink} className="space-y-6">
             <div className="space-y-3">
               <label className="block text-xl font-bold text-black">Email:</label>
 
@@ -102,7 +107,7 @@ export default function ForgetPasswordPage() {
                 disabled={loading}
                 className="rounded-full bg-[#244a9b] px-10 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-60"
               >
-                {loading ? "Sending..." : "Send a reset code"}
+                {loading ? "Sending..." : "Send reset link"}
               </button>
             </div>
 

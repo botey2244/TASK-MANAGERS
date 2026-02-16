@@ -19,13 +19,12 @@ export default function SignupForm() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
 
-    // ✅ prevent double submit
     if (loading) return;
 
     setErrorMessage("");
     setSuccessMessage("");
 
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
 
     if (!fullName.trim()) {
       setErrorMessage("Please enter your full name.");
@@ -60,7 +59,6 @@ export default function SignupForm() {
     if (error) {
       const msg = error.message.toLowerCase();
 
-      // ✅ friendly rate limit message
       if (msg.includes("rate limit")) {
         setErrorMessage(
           "Too many attempts. Please wait 5–10 minutes, then try again."
@@ -76,6 +74,9 @@ export default function SignupForm() {
 
     // ✅ success
     setSuccessMessage("Account created! Redirecting to login...");
+
+    // You can keep your behavior: go to login after signup.
+    // Admin/user redirect will happen after login.
     setTimeout(() => router.push("/login"), 800);
   }
 
