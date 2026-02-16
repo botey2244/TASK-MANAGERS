@@ -37,7 +37,7 @@ export default function AddTaskPage() {
   const [status, setStatus] = useState<TaskStatus>("Pending");
   const [dueDate, setDueDate] = useState<string>(""); // YYYY-MM-DD
 
-  // 🔐 protect + if edit -> load task
+  // protect + if edit -> load task
   useEffect(() => {
     let mounted = true;
 
