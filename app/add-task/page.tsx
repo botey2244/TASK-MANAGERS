@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -154,7 +156,7 @@ export default function AddTaskPage() {
         return;
       }
 
-      // ✅ Create notification (taskId already exists -> no FK error)
+      // Create notification (taskId already exists -> no FK error)
       // If you are using SQL trigger Option B, you can DELETE this block.
       const { error: notiErr } = await supabase.from("notifications").insert({
         user_id: user.id,
@@ -175,7 +177,7 @@ export default function AddTaskPage() {
       return;
     }
 
-    // ✅ INSERT (create) + RETURN new task id
+    // INSERT (create) + RETURN new task id
     const { data: newTask, error: insertErr } = await supabase
       .from("tasks")
       .insert({
@@ -191,7 +193,7 @@ export default function AddTaskPage() {
       return;
     }
 
-    // ✅ Create notification using the REAL new task id (prevents FK error)
+    // Create notification using the REAL new task id (prevents FK error)
     // If you are using SQL trigger Option B, you can DELETE this block.
     const { error: notiErr } = await supabase.from("notifications").insert({
       user_id: user.id,
